@@ -176,13 +176,9 @@
         <div id="newSessionSetup" class="setup-box hidden">
             <h2>Create New Session</h2>
             <div class="control-group">
-                <div class="label">1. Upload your CSV File</div>
+                <div class="label">Upload your CSV File</div>
                 <small>Format: Simplified,Traditional,Pinyin,English</small>
                 <input type="file" id="csvFile" accept=".csv" required>
-            </div>
-             <div class="control-group">
-                <label for="geminiApiKey">2. Gemini API Key (Optional)</label>
-                <input type="password" id="geminiApiKey" placeholder="For audio pronunciation">
             </div>
             <button id="createSessionBtn" class="btn btn-primary">Create & Start</button>
         </div>
@@ -231,7 +227,6 @@
         const loadSessionBtn = document.getElementById('loadSessionBtn');
         const createSessionBtn = document.getElementById('createSessionBtn');
         const csvFileInput = document.getElementById('csvFile');
-        const apiKeyInput = document.getElementById('geminiApiKey');
         const sessionFileInput = document.getElementById('sessionFile');
         const flashcard = document.getElementById('flashcard');
         const frontText = document.getElementById('frontText');
@@ -245,7 +240,7 @@
         const currentScoreText = document.getElementById('currentScoreText');
 
         // --- App State ---
-        let sessionData = { apiKey: '', cards: [] };
+        let sessionData = { cards: [] };
         let currentCard = null;
 
         // --- Event Listeners ---
@@ -273,7 +268,7 @@
             reader.onload = (event) => {
                 const cards = parseCSVToCards(event.target.result);
                 if (cards.length > 0) {
-                    sessionData = { apiKey: apiKeyInput.value, cards: cards };
+                    sessionData = { cards: cards };
                     startApp();
                 } else {
                     alert("Could not parse cards. Please check the 4-column format: Simplified,Traditional,Pinyin,English");
@@ -387,7 +382,7 @@
             // Use traditional character for Cantonese and simplified for Mandarin
             const textToSpeak = langCode === 'zh-HK' ? currentCard.traditional : currentCard.simplified;
             
-            const utterance = new SpeechSynthesisUtterterance(textToSpeak);
+            const utterance = new SpeechSynthesisUtterance(textToSpeak);
             utterance.lang = langCode;
             utterance.rate = 0.8;
             window.speechSynthesis.speak(utterance);

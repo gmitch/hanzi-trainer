@@ -36,7 +36,6 @@ A simple, effective, and offline-first flashcard application for memorizing Chin
 3.  **Start a Session**
     -   Open the `hanzi-trainer.html` file in your web browser (Chrome, Firefox, Safari, etc.).
     -   To start with a new vocabulary list, click **"Start New Session"** and select your `.csv` file.
-    -   To enable audio feature, provide your Gemini API key following the steps [here](https://ai.google.dev/gemini-api/docs/api-key)
     -   To continue a previous session, click **"Load Existing Session"** and select your saved `.json` file.
 
 4.  **Study**
