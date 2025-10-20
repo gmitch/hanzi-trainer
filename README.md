@@ -2,8 +2,10 @@
 
 A simple, effective, and offline-first flashcard application for memorizing Chinese characters (Hanzi). This tool uses a Spaced Repetition System (SRS) to help you focus on the characters you know least, and it runs entirely in your web browser.
 
-![Hanzi Trainer Screenshot](https://i.imgur.com/your-screenshot-url.png)
-*(To add a screenshot: take a picture of the app running, upload it to a site like imgur.com, and replace the URL above.)*
+
+![Hanzi Trainer Screenshot](https://raw.githubusercontent.com/gmitch/hanzi-trainer/refs/heads/main/hanzi1.png)
+![Hanzi Trainer Screenshot](https://raw.githubusercontent.com/gmitch/hanzi-trainer/refs/heads/main/hanzi2.png)
+![Hanzi Trainer Screenshot](https://raw.githubusercontent.com/gmitch/hanzi-trainer/refs/heads/main/hanzi3.png)
 
 ## Features
 
