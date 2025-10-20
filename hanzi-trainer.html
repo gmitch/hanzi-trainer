@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chinese Flashcard Trainer v4.0</title>
+    <title>Hanzi Trainer</title>
     <style>
         :root {
             --card-bg: #fff;
@@ -147,18 +147,30 @@
         
         .progress-container { margin-top: 15px; font-size: 14px; color: #666; }
         .hidden { display: none; }
+        .repo-link {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        .repo-link a {
+            color: #6c757d;
+            text-decoration: none;
+        }
+        .repo-link a:hover {
+            text-decoration: underline;
+        }
 
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Chinese Flashcard Trainer v4.0</h1>
+        <h1>Hanzi Trainer</h1>
         
         <div id="welcomeScreen" class="setup-box">
             <h2>Welcome!</h2>
             <button id="newSessionBtn" class="btn btn-primary">Start New Session (from CSV)</button>
             <button id="loadSessionBtn" class="btn btn-secondary">Load Existing Session (from JSON)</button>
+            <p class="repo-link"><a href="https://github.com/gmitch/hanzi-trainer" target="_blank" rel="noopener noreferrer">Visit on GitHub</a></p>
         </div>
 
         <div id="newSessionSetup" class="setup-box hidden">
@@ -290,7 +302,7 @@
             const url = URL.createObjectURL(dataBlob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = 'chinese_session.json';
+            link.download = 'hanzi_trainer_session.json';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -375,7 +387,7 @@
             // Use traditional character for Cantonese and simplified for Mandarin
             const textToSpeak = langCode === 'zh-HK' ? currentCard.traditional : currentCard.simplified;
             
-            const utterance = new SpeechSynthesisUtterance(textToSpeak);
+            const utterance = new SpeechSynthesisUtterterance(textToSpeak);
             utterance.lang = langCode;
             utterance.rate = 0.8;
             window.speechSynthesis.speak(utterance);
