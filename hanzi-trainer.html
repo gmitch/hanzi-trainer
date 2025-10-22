@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hanzi Trainer</title>
+    <title>Hanzi Trainer (Multi-Deck)</title>
     <style>
         :root {
             --card-bg: #fff;
@@ -59,7 +59,7 @@
             margin-top: -3px;
             margin-bottom: 5px;
         }
-        .control-group input {
+        .control-group input[type="text"], .control-group input[type="file"] {
             width: 100%;
             padding: 8px;
             border-radius: 4px;
@@ -80,7 +80,36 @@
         .btn-primary:hover { background-color: #0056b3; }
         .btn-secondary { background-color: #6c757d; }
         .btn-secondary:hover { background-color: #5a6268; }
+        .btn-danger { background-color: var(--incorrect-color); }
+        .btn-danger:hover { background-color: #c82333; }
+        .btn-small { padding: 5px 10px; font-size: 14px; margin: 0 3px; }
+
+        /* Deck Manager Styles */
+        #deckList {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+        }
+        #deckList li {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .deck-name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .deck-progress {
+            font-size: 12px;
+            color: #555;
+        }
         
+        /* Flashcard Styles */
         .flashcard-container {
             perspective: 1000px;
             min-height: 250px;
@@ -164,34 +193,33 @@
 <body>
 
     <div class="container">
-        <h1>Hanzi Trainer</h1>
+        <h1 id="mainTitle">Hanzi Trainer</h1>
         
-        <div id="welcomeScreen" class="setup-box">
-            <h2>Welcome!</h2>
-            <button id="newSessionBtn" class="btn btn-primary">Start New Session (from CSV)</button>
-            <button id="loadSessionBtn" class="btn btn-secondary">Load Existing Session (from JSON)</button>
+        <div id="deckManager" class="setup-box">
+            <h2>Manage Decks</h2>
+            <ul id="deckList">
+                </ul>
+            <button id="showCreateDeckBtn" class="btn btn-primary">Create New Deck</button>
             <p class="repo-link"><a href="https://github.com/gmitch/hanzi-trainer" target="_blank" rel="noopener noreferrer">Visit on GitHub</a></p>
         </div>
 
-        <div id="newSessionSetup" class="setup-box hidden">
-            <h2>Create New Session</h2>
+        <div id="createDeckView" class="setup-box hidden">
+            <h2>Create New Deck</h2>
+            <div class="control-group">
+                <label for="deckName">Deck Name</label>
+                <input type="text" id="deckName" placeholder="e.g. HSK 1" required>
+            </div>
             <div class="control-group">
                 <div class="label">Upload your CSV File</div>
                 <small>Format: Simplified,Traditional,Pinyin,English</small>
                 <input type="file" id="csvFile" accept=".csv" required>
             </div>
-            <button id="createSessionBtn" class="btn btn-primary">Create & Start</button>
-        </div>
-
-        <div id="loadSessionSetup" class="setup-box hidden">
-            <h2>Load Session File</h2>
-            <div class="control-group">
-                <label for="sessionFile">Select your `.json` session file</label>
-                <input type="file" id="sessionFile" accept=".json" required>
-            </div>
+            <button id="createDeckBtn" class="btn btn-primary">Create Deck</button>
+            <button id="cancelCreateBtn" class="btn btn-secondary">Cancel</button>
         </div>
 
         <div id="app" class="hidden">
+            <button id="backToDecksBtn" class="btn btn-secondary" style="margin-bottom: 15px;">&larr; Back to Decks</button>
             <div class="flashcard-container">
                 <div class="flashcard" id="flashcard">
                     <div class="card-face card-front">
@@ -213,21 +241,24 @@
                 <span id="progressText"></span> | 
                 <span id="currentScoreText"></span>
             </div>
-            <button id="saveSessionBtn" class="btn btn-secondary" style="margin-top: 20px;">Save Session</button>
         </div>
     </div>
 
     <script>
         // --- DOM Elements ---
-        const welcomeScreen = document.getElementById('welcomeScreen');
-        const newSessionSetup = document.getElementById('newSessionSetup');
-        const loadSessionSetup = document.getElementById('loadSessionSetup');
-        const app = document.getElementById('app');
-        const newSessionBtn = document.getElementById('newSessionBtn');
-        const loadSessionBtn = document.getElementById('loadSessionBtn');
-        const createSessionBtn = document.getElementById('createSessionBtn');
+        const mainTitle = document.getElementById('mainTitle');
+        const deckManager = document.getElementById('deckManager');
+        const deckList = document.getElementById('deckList');
+        const showCreateDeckBtn = document.getElementById('showCreateDeckBtn');
+        
+        const createDeckView = document.getElementById('createDeckView');
+        const deckNameInput = document.getElementById('deckName');
         const csvFileInput = document.getElementById('csvFile');
-        const sessionFileInput = document.getElementById('sessionFile');
+        const createDeckBtn = document.getElementById('createDeckBtn');
+        const cancelCreateBtn = document.getElementById('cancelCreateBtn');
+
+        const app = document.getElementById('app');
+        const backToDecksBtn = document.getElementById('backToDecksBtn');
         const flashcard = document.getElementById('flashcard');
         const frontText = document.getElementById('frontText');
         const frontTraditional = document.getElementById('frontTraditional');
@@ -235,74 +266,181 @@
         const backDetails = document.getElementById('backDetails');
         const correctBtn = document.getElementById('correctBtn');
         const incorrectBtn = document.getElementById('incorrectBtn');
-        const saveSessionBtn = document.getElementById('saveSessionBtn');
         const progressText = document.getElementById('progressText');
         const currentScoreText = document.getElementById('currentScoreText');
 
         // --- App State ---
-        let sessionData = { cards: [] };
+        let appData = {
+            library: {},    // Holds all decks, e.g. { "HSK 1": { cards: [...] } }
+            currentDeckName: null
+        };
         let currentCard = null;
 
+        // --- Storage Key ---
+        const STORAGE_KEY = 'hanziTrainerLibrary';
+
         // --- Event Listeners ---
-        newSessionBtn.addEventListener('click', () => {
-            welcomeScreen.classList.add('hidden');
-            newSessionSetup.classList.remove('hidden');
-        });
-        loadSessionBtn.addEventListener('click', () => {
-            welcomeScreen.classList.add('hidden');
-            loadSessionSetup.classList.remove('hidden');
-            sessionFileInput.click();
-        });
-        createSessionBtn.addEventListener('click', handleCreateSession);
-        sessionFileInput.addEventListener('change', handleLoadSession);
+        showCreateDeckBtn.addEventListener('click', showCreateDeckView);
+        cancelCreateBtn.addEventListener('click', showDeckManager);
+        createDeckBtn.addEventListener('click', handleCreateDeck);
+        backToDecksBtn.addEventListener('click', showDeckManager);
+
         flashcard.addEventListener('click', () => flashcard.classList.toggle('is-flipped'));
         correctBtn.addEventListener('click', () => handleAnswer(true));
         incorrectBtn.addEventListener('click', () => handleAnswer(false));
-        saveSessionBtn.addEventListener('click', handleSaveSession);
+        
+        // --- App Initialization ---
+        window.addEventListener('load', () => {
+            loadLibrary();
+            renderDeckManager();
+        });
 
-        // --- Workflow Functions ---
-        function handleCreateSession() {
+        // --- View Management ---
+        function showDeckManager() {
+            loadLibrary(); // Reload data
+            renderDeckManager(); // Re-draw deck list
+            
+            app.classList.add('hidden');
+            createDeckView.classList.add('hidden');
+            deckManager.classList.remove('hidden');
+            mainTitle.textContent = "Hanzi Trainer";
+            appData.currentDeckName = null;
+            currentCard = null;
+        }
+
+        function showCreateDeckView() {
+            deckManager.classList.add('hidden');
+            createDeckView.classList.remove('hidden');
+            deckNameInput.value = '';
+            csvFileInput.value = null;
+        }
+
+        function showAppView(deckName) {
+            appData.currentDeckName = deckName;
+            
+            deckManager.classList.add('hidden');
+            createDeckView.classList.add('hidden');
+            app.classList.remove('hidden');
+            mainTitle.textContent = deckName;
+
+            nextCard();
+        }
+
+        // --- LocalStorage CRUD ---
+        function loadLibrary() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            if (data) {
+                appData.library = JSON.parse(data);
+            } else {
+                appData.library = {};
+            }
+        }
+
+        function saveLibrary() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appData.library));
+        }
+
+        function saveCurrentDeckProgress() {
+            // This function saves the progress of the active deck back into the main library
+            if (appData.currentDeckName) {
+                // We assume appData.library is up-to-date from when the deck was opened
+                saveLibrary(); // Just save the whole library object back
+            }
+        }
+
+        // --- Deck Management Functions ---
+        function renderDeckManager() {
+            deckList.innerHTML = '';
+            const decks = Object.keys(appData.library);
+            if (decks.length === 0) {
+                deckList.innerHTML = '<p style="text-align: center; color: #777;">No decks found. Create one to get started!</p>';
+                return;
+            }
+
+            decks.forEach(deckName => {
+                const deck = appData.library[deckName];
+                const total = deck.cards.length;
+                const mastered = deck.cards.filter(c => c.score === 10).length;
+                
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div>
+                        <span class="deck-name">${deckName}</span>
+                        <div class="deck-progress">Mastered: ${mastered} / ${total}</div>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary btn-small" onclick="handleOpenDeck('${deckName}')">Open</button>
+                        <button class="btn btn-secondary btn-small" onclick="handleRenameDeck('${deckName}')">Edit</button>
+                        <button class="btn btn-danger btn-small" onclick="handleDeleteDeck('${deckName}')">Delete</button>
+                    </div>
+                `;
+                deckList.appendChild(li);
+            });
+        }
+
+        function handleCreateDeck() {
+            const deckName = deckNameInput.value.trim();
             const file = csvFileInput.files[0];
-            if (!file) { alert("Please select a CSV file."); return; }
+
+            if (!deckName) {
+                alert("Please enter a deck name.");
+                return;
+            }
+            if (appData.library[deckName]) {
+                alert("A deck with this name already exists.");
+                return;
+            }
+            if (!file) {
+                alert("Please select a CSV file.");
+                return;
+            }
+
             const reader = new FileReader();
             reader.onload = (event) => {
                 const cards = parseCSVToCards(event.target.result);
                 if (cards.length > 0) {
-                    sessionData = { cards: cards };
-                    startApp();
+                    appData.library[deckName] = { cards: cards };
+                    saveLibrary();
+                    showDeckManager();
                 } else {
                     alert("Could not parse cards. Please check the 4-column format: Simplified,Traditional,Pinyin,English");
                 }
             };
             reader.readAsText(file);
         }
-        function handleLoadSession(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const loadedData = JSON.parse(e.target.result);
-                    if (loadedData && Array.isArray(loadedData.cards)) {
-                        sessionData = loadedData;
-                        startApp();
-                    } else { throw new Error("Invalid session file format."); }
-                } catch (error) { alert("Error reading session file: " + error.message); }
-            };
-            reader.readAsText(file);
+
+        window.handleOpenDeck = (deckName) => { // Attach to window to be callable from onclick
+            showAppView(deckName);
         }
-        function handleSaveSession() {
-            const dataStr = JSON.stringify(sessionData, null, 2);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(dataBlob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'hanzi_trainer_session.json';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
+        
+        window.handleRenameDeck = (oldName) => {
+            const newName = prompt("Enter a new name for the deck:", oldName);
+            if (!newName || newName.trim() === '') {
+                return; // User cancelled
+            }
+            if (newName === oldName) {
+                return; // No change
+            }
+            if (appData.library[newName]) {
+                alert("A deck with that name already exists.");
+                return;
+            }
+
+            // Perform the rename
+            appData.library[newName] = appData.library[oldName];
+            delete appData.library[oldName];
+            saveLibrary();
+            renderDeckManager();
         }
+
+        window.handleDeleteDeck = (deckName) => {
+            if (confirm(`Are you sure you want to permanently delete the deck "${deckName}"?`)) {
+                delete appData.library[deckName];
+                saveLibrary();
+                renderDeckManager();
+            }
+        }
+        
         function parseCSVToCards(text) {
             const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
             return lines.map(line => {
@@ -311,19 +449,18 @@
                     const simplified = parts[0].trim();
                     const traditional = parts[1].trim();
                     const pinyin = parts[2].trim();
-                    const english = parts.slice(3).join(',').trim(); // Handle commas in English translation
+                    const english = parts.slice(3).join(',').trim();
                     return { simplified, traditional, pinyin, english, score: 1 };
                 }
                 return null;
             }).filter(card => card !== null);
         }
-        function startApp() {
-            [welcomeScreen, newSessionSetup, loadSessionSetup].forEach(el => el.classList.add('hidden'));
-            app.classList.remove('hidden');
-            nextCard();
+
+        // --- Core Flashcard Logic ---
+        function getCurrentDeck() {
+            return appData.library[appData.currentDeckName]?.cards || [];
         }
 
-        // --- Core App Logic ---
         function nextCard() {
             flashcard.classList.remove('is-flipped');
             currentCard = getNextCardByWeight();
@@ -331,18 +468,25 @@
                 displayCard();
                 updateProgress();
             } else {
-                alert("Deck finished!");
+                alert("Deck finished or is empty!");
+                showDeckManager();
             }
         }
+
         function getNextCardByWeight() {
+            const currentDeck = getCurrentDeck();
+            if (currentDeck.length === 0) return null;
+
             const weightedPool = [];
-            sessionData.cards.forEach(card => {
+            currentDeck.forEach(card => {
                 const weight = 11 - card.score;
                 for (let i = 0; i < weight; i++) { weightedPool.push(card); }
             });
-            if (weightedPool.length === 0) return sessionData.cards.length > 0 ? sessionData.cards[0] : null;
+
+            if (weightedPool.length === 0) return currentDeck[0];
             return weightedPool[Math.floor(Math.random() * weightedPool.length)];
         }
+
         function displayCard() {
             frontText.textContent = currentCard.simplified;
             frontTraditional.textContent = currentCard.traditional;
@@ -359,6 +503,7 @@
             `;
             currentScoreText.textContent = `Word Score: ${currentCard.score}/10`;
         }
+
         function handleAnswer(isCorrect) {
             if (!currentCard) return;
             if (isCorrect) {
@@ -366,20 +511,27 @@
             } else {
                 currentCard.score = Math.max(1, currentCard.score - 2);
             }
+            
+            // Auto-save progress
+            saveCurrentDeckProgress();
+            
             setTimeout(nextCard, 200);
         }
+
         function updateProgress() {
-            const totalCards = sessionData.cards.length;
+            const currentDeck = getCurrentDeck();
+            const totalCards = currentDeck.length;
             if (totalCards === 0) return;
-            const masteredCards = sessionData.cards.filter(card => card.score === 10).length;
+            
+            const masteredCards = currentDeck.filter(card => card.score === 10).length;
             const percentage = Math.round((masteredCards / totalCards) * 100);
             progressText.textContent = `Mastered: ${masteredCards} / ${totalCards} (${percentage}%)`;
         }
-        function playAudio(event, langCode) {
+
+        window.playAudio = (event, langCode) => { // Attach to window for onclick
             event.stopPropagation();
             if (!currentCard) return;
             
-            // Use traditional character for Cantonese and simplified for Mandarin
             const textToSpeak = langCode === 'zh-HK' ? currentCard.traditional : currentCard.simplified;
             
             const utterance = new SpeechSynthesisUtterance(textToSpeak);
