@@ -18,7 +18,7 @@ You don't need to download or install anything. Just use the live version:
 
 ---
 
-### 2. Download Directly
+### 2. Download Directly (or clone this repo! git@github.com:gmitch/hanzi-trainer.git )
 
 You can just download the single file needed to run the app.
 
