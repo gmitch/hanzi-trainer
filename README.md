@@ -8,7 +8,7 @@ A simple, effective, and offline-first flashcard application for memorizing Chin
 
 ## How to Use
 
-There are three easy ways to use this app.
+There are two easy ways to use this app.
 
 ### 1. Live App (Recommended)
 
@@ -18,18 +18,15 @@ You don't need to download or install anything. Just use the live version:
 
 ---
 
-### 2. From GitHub
+### 2. Download Directly
 
-You can also run the project from your local computer.
+You can just download the single file needed to run the app.
 
-* **Clone the Repo:**
-    ```bash
-    git clone [https://github.com/gmitch/hanzi-trainer.git](https://github.com/gmitch/hanzi-trainer.git)
-    ```
-    Then, open the `hanzi-trainer.html` file in your browser.
-
-* **Download Directly:**
-    You can [download the `hanzi-trainer.html` file directly](https://raw.githubusercontent.com/gmitch/hanzi-trainer/main/hanzi-trainer.html) (right-click and "Save As...").
+1.  Go to the `hanzi-trainer.html` file in the repo: **[Click Here](https://github.com/gmitch/hanzi-trainer/blob/main/hanzi-trainer.html)**
+2.  Find the "Raw" button (it's near the top right of the file view).
+3.  Right-click the **"Raw"** button.
+4.  Select "Save Link As..." (or "Save As...") to download the file to your computer.
+5.  Open the downloaded `hanzi-trainer.html` file in your browser.
 
 ---
 
