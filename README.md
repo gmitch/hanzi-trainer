@@ -2,20 +2,34 @@
 
 A simple, effective, and offline-first flashcard application for memorizing Chinese characters (Hanzi). This tool uses a Spaced Repetition System (SRS) to help you focus on the characters you know least, and it runs entirely in your web browser.
 
+![Hanzi Trainer Welcome Screen](https://raw.githubusercontent.com/gmitch/hanzi-trainer/refs/heads/main/hanzi1.png)
+![Hanzi Trainer Flashcard Front](https://raw.githubusercontent.com/gmitch/hanzi-trainer/refs/heads/main/hanzi2.png)
+![Hanzi Trainer Flashcard Back](https://raw.githubusercontent.com/gmitch/hanzi-trainer/refs/heads/main/hanzi3.png)
+
 ## How to Use
 
-### Easy Access (Recommended)
+There are three easy ways to use this app.
 
-The easiest way to use Hanzi Trainer is directly from the web. You don't need to download any files.
+### 1. Live App (Recommended)
 
-1.  **[Click here to open the app](https://gmitch.github.io/hanzi-trainer/hanzi-trainer.html)**
-2.  Follow the "App Instructions" below to get started with your vocabulary list.
+You don't need to download or install anything. Just use the live version:
 
-### Local Use (Offline)
+➡️ **[Open the Hanzi Trainer App](https://gmitch.github.io/hanzi-trainer/hanzi-trainer.html)**
 
-If you prefer to run the app locally from your own computer:
-1.  Download the `hanzi-trainer.html` file from this repository.
-2.  Open the file in your web browser (Chrome, Firefox, Safari, etc.).
+---
+
+### 2. From GitHub
+
+You can also run the project from your local computer.
+
+* **Clone the Repo:**
+    ```bash
+    git clone [https://github.com/gmitch/hanzi-trainer.git](https://github.com/gmitch/hanzi-trainer.git)
+    ```
+    Then, open the `hanzi-trainer.html` file in your browser.
+
+* **Download Directly:**
+    You can [download the `hanzi-trainer.html` file directly](https://raw.githubusercontent.com/gmitch/hanzi-trainer/main/hanzi-trainer.html) (right-click and "Save As...").
 
 ---
 
