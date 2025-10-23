@@ -1,0 +1,5 @@
+# Server Deck Configuration
+# Format: Display Name|filename.csv
+# One deck per line
+
+Sample Deck|sample.csv

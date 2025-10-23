@@ -205,6 +205,18 @@
 
         <div id="createDeckView" class="setup-box hidden">
             <h2>Create New Deck</h2>
+
+            <div id="serverDeckSection" class="control-group">
+                <div class="label">Load from Server</div>
+                <small>Choose from available server decks</small>
+                <select id="serverDeckSelect" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; margin-bottom: 10px;">
+                    <option value="">Select a server deck...</option>
+                </select>
+                <button id="loadServerDeckBtn" class="btn btn-primary" style="width: 100%; margin-bottom: 15px;">Load Server Deck</button>
+            </div>
+
+            <div id="serverDeckDivider" style="text-align: center; margin: 15px 0; color: #666;">--- OR ---</div>
+
             <div class="control-group">
                 <label for="deckName">Deck Name</label>
                 <input type="text" id="deckName" placeholder="e.g. HSK 1" required>
@@ -256,6 +268,10 @@
         const csvFileInput = document.getElementById('csvFile');
         const createDeckBtn = document.getElementById('createDeckBtn');
         const cancelCreateBtn = document.getElementById('cancelCreateBtn');
+        const serverDeckSection = document.getElementById('serverDeckSection');
+        const serverDeckDivider = document.getElementById('serverDeckDivider');
+        const serverDeckSelect = document.getElementById('serverDeckSelect');
+        const loadServerDeckBtn = document.getElementById('loadServerDeckBtn');
 
         const app = document.getElementById('app');
         const backToDecksBtn = document.getElementById('backToDecksBtn');
@@ -283,6 +299,7 @@
         showCreateDeckBtn.addEventListener('click', showCreateDeckView);
         cancelCreateBtn.addEventListener('click', showDeckManager);
         createDeckBtn.addEventListener('click', handleCreateDeck);
+        loadServerDeckBtn.addEventListener('click', handleLoadServerDeck);
         backToDecksBtn.addEventListener('click', showDeckManager);
 
         flashcard.addEventListener('click', () => flashcard.classList.toggle('is-flipped'));
@@ -313,6 +330,16 @@
             createDeckView.classList.remove('hidden');
             deckNameInput.value = '';
             csvFileInput.value = null;
+
+            // Check if running locally (file:// protocol)
+            if (window.location.protocol === 'file:') {
+                serverDeckSection.classList.add('hidden');
+                serverDeckDivider.classList.add('hidden');
+            } else {
+                serverDeckSection.classList.remove('hidden');
+                serverDeckDivider.classList.remove('hidden');
+                loadServerDecks();
+            }
         }
 
         function showAppView(deckName) {
@@ -538,6 +565,82 @@
             utterance.lang = langCode;
             utterance.rate = 0.8;
             window.speechSynthesis.speak(utterance);
+        }
+
+        // --- Server Deck Loading Functions ---
+        async function loadServerDecks() {
+            try {
+                const response = await fetch('decks.txt');
+                if (!response.ok) {
+                    console.log('No decks.txt file found on server');
+                    return;
+                }
+
+                const text = await response.text();
+                const decks = parseDecksConfig(text);
+                populateServerDeckSelect(decks);
+            } catch (error) {
+                console.log('Could not load server decks:', error.message);
+            }
+        }
+
+        function parseDecksConfig(text) {
+            const lines = text.split(/\r?\n/).filter(line => line.trim() !== '' && !line.trim().startsWith('#'));
+            return lines.map(line => {
+                const parts = line.split('|');
+                if (parts.length >= 2) {
+                    return {
+                        name: parts[0].trim(),
+                        filename: parts[1].trim()
+                    };
+                }
+                return null;
+            }).filter(deck => deck !== null);
+        }
+
+        function populateServerDeckSelect(decks) {
+            serverDeckSelect.innerHTML = '<option value="">Select a server deck...</option>';
+            decks.forEach(deck => {
+                const option = document.createElement('option');
+                option.value = deck.filename;
+                option.textContent = deck.name;
+                serverDeckSelect.appendChild(option);
+            });
+        }
+
+        async function handleLoadServerDeck() {
+            const selectedFile = serverDeckSelect.value;
+            if (!selectedFile) {
+                alert('Please select a deck from the list.');
+                return;
+            }
+
+            const selectedDeckName = serverDeckSelect.options[serverDeckSelect.selectedIndex].textContent;
+
+            if (appData.library[selectedDeckName]) {
+                alert('A deck with this name already exists.');
+                return;
+            }
+
+            try {
+                const response = await fetch(selectedFile);
+                if (!response.ok) {
+                    throw new Error(`Could not load ${selectedFile}`);
+                }
+
+                const csvText = await response.text();
+                const cards = parseCSVToCards(csvText);
+
+                if (cards.length > 0) {
+                    appData.library[selectedDeckName] = { cards: cards };
+                    saveLibrary();
+                    showDeckManager();
+                } else {
+                    alert("Could not parse cards. Please check the 4-column format: Simplified,Traditional,Pinyin,English");
+                }
+            } catch (error) {
+                alert(`Error loading deck: ${error.message}`);
+            }
         }
     </script>
 </body>
