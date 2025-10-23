@@ -1,14 +1,8 @@
 # Hanzi Trainer
 
-A simple, effective, and offline-first flashcard application for memorizing Chinese characters (Hanzi). This tool uses a Spaced Repetition System (SRS) to help you focus on the characters you know least, and it runs entirely in your web browser.
-
-![Hanzi Trainer Welcome Screen](https://raw.githubusercontent.com/gmitch/hanzi-trainer/refs/heads/main/hanzi1.png)
-![Hanzi Trainer Flashcard Front](https://raw.githubusercontent.com/gmitch/hanzi-trainer/refs/heads/main/hanzi2.png)
-![Hanzi Trainer Flashcard Back](https://raw.githubusercontent.com/gmitch/hanzi-trainer/refs/heads/main/hanzi3.png)
+A powerful, multi-deck flashcard application for memorizing Chinese characters (Hanzi). This tool uses a Spaced Repetition System (SRS) and saves your progress automatically, right in your browser.
 
 ## How to Use
-
-There are two easy ways to use this app.
 
 ### 1. Live App (Recommended)
 
@@ -18,22 +12,31 @@ You don't need to download or install anything. Just use the live version:
 
 ---
 
-### 2. Download Directly (or clone this repo! git@github.com:gmitch/hanzi-trainer.git )
+### 2. Download or Clone
 
-You can just download the single file needed to run the app.
+You can also run the project from your local computer.
 
-1.  Go to the `hanzi-trainer.html` file in the repo: **[Click Here](https://github.com/gmitch/hanzi-trainer/blob/main/hanzi-trainer.html)**
-2.  Find the "Raw" button (it's near the top right of the file view).
-3.  Right-click the **"Raw"** button.
-4.  Select "Save Link As..." (or "Save As...") to download the file to your computer.
-5.  Open the downloaded `hanzi-trainer.html` file in your browser.
+* **Clone the Repo:**
+    `git@github.com:gmitch/hanzi-trainer.git`
+    Then, open the `hanzi-trainer.html` file in your browser.
+
+* **Download Directly:**
+    You can [download the `hanzi-trainer.html` file directly](https://raw.githubusercontent.com/gmitch/hanzi-trainer/main/hanzi-trainer.html) (right-click and "Save As...").
 
 ---
 
-## App Instructions
+## Getting Started: Deck Management
 
-1.  **Prepare Your Vocabulary List**
-    Create a `.csv` file with four columns in the following order: `Simplified`, `Traditional`, `Pinyin`, `English`.
+This app is built around a "Deck Manager" that holds all your vocabulary lists.
+
+### 1. Create a Deck
+
+1.  From the main screen, click **"Create New Deck"**.
+2.  Give your deck a unique name (e.g., "HSK 1" or "Chapter 3 Verbs").
+3.  Upload your vocabulary `.csv` file.
+
+    **CSV Format:** Your file must have four columns in this specific order:
+    `Simplified`, `Traditional`, `Pinyin`, `English`
     
     *Example `vocab.csv` file:*
     ```csv
@@ -42,36 +45,45 @@ You can just download the single file needed to run the app.
     学,學,xué,to study
     生,生,shēng,life / to be born
     ```
+4.  Click **"Create Deck"**. You will be returned to the manager, where you'll see your new deck.
 
-2.  **Start a Session**
-    -   To start with a new vocabulary list, click **"Start New Session"** and select your `.csv` file.
-    -   To continue a previous session, click **"Load Existing Session"** and select your saved `.json` file.
+### 2. Open & Study a Deck
 
-3.  **Study**
-    -   Look at the simplified character on the front. The traditional character is in the top right.
-    -   Click the card to flip it over and see the details.
-    -   Use the audio buttons to hear the Mandarin and Cantonese pronunciations.
-    -   Click **"Knew It"** or **"Didn't Know"** to rate your knowledge and move to the next card.
+* On the main screen, find the deck you want to study and click **"Open"**.
+* This will take you to the main flashcard view.
+* Click the card to flip it over.
+* Use the audio buttons for **Mandarin** and **Cantonese** pronunciations.
+* Select **"Knew It"** or **"Didn't Know"** to rate your knowledge.
 
-4.  **Save Your Progress**
-    When you are done studying, click the **"Save Session"** button. This will download a `hanzi_trainer_session.json` file containing all your words and their current scores.
+### 3. Automatic Saving
+
+Your progress (the 1-10 score for each word) is **saved automatically** to your browser's local storage every time you answer a card. There is no "Save" button.
+
+You can close the app at any time. When you re-open that deck, you will pick up right where you left off.
+
+### 4. Manage Your Decks
+
+From the main "Manage Decks" screen, you can:
+* **Rename:** Click **"Edit"** to give a deck a new name.
+* **Delete:** Click **"Delete"** to permanently remove a deck and all its progress (you will be asked to confirm).
 
 ## Features
 
+-   **Multi-Deck Library:** Create, rename, and delete multiple, separate vocabulary decks.
+-   **Automatic Progress Saving:** Uses browser `localStorage` to save your scores automatically. No manual saving or loading!
 -   **Spaced Repetition System (SRS):** Characters you struggle with appear more frequently. Each word has a score from 1 (new) to 10 (mastered).
--   **Load from CSV:** Easily import your vocabulary lists from a simple `.csv` file.
--   **Save/Load Progress:** Save your entire session, including scores for each word, into a `.json` file. Load it again later to pick up exactly where you left off.
--   **Dual Audio Pronunciation:** Listen to both **Mandarin** (for the simplified character) and **Cantonese** (for the traditional character) pronunciations using the browser's built-in text-to-speech.
+-   **Load from CSV:** Easily import your vocabulary lists from a 4-column `.csv` file.
+-   **Dual Audio Pronunciation:** Listen to both **Mandarin** (Simplified) and **Cantonese** (Traditional) pronunciations.
 -   **Traditional & Simplified:** Displays both character sets to aid comprehensive learning.
--   **Offline First:** The entire application is a single HTML file. Your data is never uploaded.
--   **Zero Dependencies:** No need to install anything.
+-   **Zero Dependencies:** A single HTML file that runs entirely in your browser.
 
 ## Technologies Used
 
 -   **HTML5**
 -   **CSS3**
 -   **Vanilla JavaScript (ES6)**
--   **Web Speech API** for text-to-speech functionality.
+-   **Web Speech API** (for text-to-speech)
+-   **Browser `localStorage`** (for progress saving)
 
 ## License
 
