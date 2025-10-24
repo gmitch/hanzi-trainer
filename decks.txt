@@ -1,0 +1,11 @@
+# Server Deck Configuration
+# Format: Display Name|filename.csv
+# One deck per line
+
+HSK Level 1|hsk1.csv
+HSK Level 2|hsk2.csv
+HSK Level 3|hsk3.csv
+HSK Level 4|hsk4.csv
+HSK Level 5|hsk5.csv
+HSK Level 6|hsk6.csv
+Sample Deck|sample.csv
